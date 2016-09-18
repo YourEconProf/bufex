@@ -24,7 +24,7 @@ def create_new_game(game_file):
     roster.columns.names = ['Week', 'Data']
     if globalvars.debug > 5:
         print(roster[:5])
-    roster.save(game_file + "_roster")
+    roster.to_pickle(game_file + "_roster")
     write_logfile(game_file, "Loaded Roster File: " + roster_file_name + " \n")
 
     # create contracts
@@ -32,7 +32,7 @@ def create_new_game(game_file):
     input("Hit any key to open the contracts file")
     contracts_file = filedialog.askopenfilename()
     contracts = pd.read_csv(contracts_file)
-    contracts.save(game_file + "_contracts")
+    contracts.to_pickle(game_file + "_contracts")
     write_logfile(game_file, "Loaded Contracts File: " + contracts_file + " \n")
     write_logfile(game_file, "GAME INITIALIZATION COMPLETED")
     if globalvars.debug > 5:
@@ -93,11 +93,11 @@ def import_trading_data(game_file, import_trades):
         trading_qty = [0, 0];
 
     # Open Contracts File:
-    contract_specs = pd.load(game_file + "_contracts")
+    contract_specs = pd.read_pickle(game_file + "_contracts")
 
     # bring in open positions
     if os.path.isfile(game_file + "_open_positions"):  # then there are open positions
-        open_positions = pd.load(game_file + "_open_positions")
+        open_positions = pd.read_pickle(game_file + "_open_positions")
         open_buys_long = open_positions[np.isnan(open_positions['SellPrice'])]
         open_buys_long = open_buys_long.rename(columns={'BuyPrice': 'Price'})
         open_buys_long = open_buys_long[['Badge', 'Qty', 'Cmdty', 'Price']]
@@ -167,7 +167,7 @@ def import_trading_data(game_file, import_trades):
 
     # Write out these positions for inclusion next time!
     #   This file is for use by the software
-    open_positions.save(game_file + "_open_positions")
+    open_positions.to_pickle(game_file + "_open_positions")
 
     #   This file should be useful to actual account holders, but its not!
     print_open_positions(open_positions, game_file, session_name)
@@ -235,7 +235,7 @@ def import_trading_data(game_file, import_trades):
     output_info = pd.concat({session_name: pd.DataFrame(output_info)}, axis=1)
 
     # Load Roster File:
-    roster = pd.load(game_file + "_roster")
+    roster = pd.read_pickle(game_file + "_roster")
 
     # Add new information using Game Name as Upper Column Name
     new_roster = pd.merge(roster, output_info, left_index=True, right_index=True, how='left')
@@ -248,7 +248,7 @@ def import_trading_data(game_file, import_trades):
                                          new_roster[session_name, 'Margin']
 
     # Save Modified Roster:
-    new_roster.save(game_file + "_roster")
+    new_roster.to_pickle(game_file + "_roster")
 
     # output roster:
     print_roster(new_roster, game_file, session_name)
@@ -290,7 +290,7 @@ def deposit_money(game_file):
     output_info = pd.concat({session_name: pd.DataFrame(output_info)}, axis=1)
 
     # Load Roster File:
-    roster = pd.load(game_file + "_roster")
+    roster = pd.read_pickle(game_file + "_roster")
 
     # Add new information using Game Name as Upper Column Name
     new_roster = pd.merge(roster, output_info, left_index=True, right_index=True, how='left')
@@ -303,7 +303,7 @@ def deposit_money(game_file):
                                          new_roster[session_name, 'Margin']
 
     # Save Modified Roster:
-    new_roster.save(game_file + "_roster")
+    new_roster.to_pickle(game_file + "_roster")
 
     # output roster:
     print_roster(new_roster, game_file, session_name)
@@ -354,7 +354,7 @@ def print_trades(buys, sells, game_file, session_name):
     all = pd.concat([buys, sells])
 
     # load roster file:
-    roster = pd.load(game_file + "_roster")
+    roster = pd.read_pickle(game_file + "_roster")
     roster = roster.All[['Badge', 'Code']]
     all = pd.merge(all, roster, on='Badge')
 
@@ -371,7 +371,7 @@ def print_open_positions(open_positions, game_file, session_name):
     # import pdb
 
     # load roster file:
-    roster = pd.load(game_file + "_roster")
+    roster = pd.read_pickle(game_file + "_roster")
     roster = roster.All[['Badge', 'Code']]
     all = pd.merge(open_positions, roster, on='Badge')
 
@@ -437,7 +437,7 @@ def print_account_statements(game_file):
     # pdb.set_trace()
 
     # Open Modified Roster:
-    roster = pd.load(game_file + "_roster")
+    roster = pd.read_pickle(game_file + "_roster")
     roster.to_html(open(game_file + "_PROF_FINAL.html", 'w'))
 
 
